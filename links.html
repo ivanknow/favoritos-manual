@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html ng-app="links">
+<head>
+<meta charset="ISO-8859-1">
+<title>Links</title>
+ <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+</head>
+<body ng-controller="LinkController as linkCtrl">
+<div class="container">
+  <div class="jumbotron">
+  
+<form name="formInsertLink"	ng-submit="formInsertLink.$valid && linkCtrl.addItem()" novalidate>
+<input type="text" class="form-control" ng-model="linkCtrl.linkAtual.title" required  placeholder="title"/><br>
+<input type="text"   class="form-control" ng-model="linkCtrl.linkAtual.src" required placeholder="link"/><br>
+<button type="submit" class="btn btn-primary">Go</button><br>
+</form>
+</div>
+<table class="table table-striped table-bordered" class="list-unstyled">
+	<tr ng-repeat="link in linkCtrl.links track by $index">
+		<td>
+			<a href="{{link.src}}" target="_blanck">{{link.title}}</a>
+		</td>
+		<td>
+			<button ng-click="linkCtrl.removeItem($index)"  class="btn btn-danger">X</button>
+	
+		</td>
+	</tr>
+</table>
+Importar/Exportar?<input type="checkbox" ng-model="linkCtrl.showImport" />
+<div ng-show="linkCtrl.showImport">
+<button ng-click="linkCtrl.exportCharge()" class="btn btn-primary">Export Charge</button>
+<textarea  class="form-control" rows="14" cols="150" ng-model="linkCtrl.chargeJson"></textarea>
+<button ng-click="linkCtrl.addCharge()" class="btn btn-primary">Load Charge</button>
+</div>
+
+
+<script src="data.json"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script>
+(function() {
+	var app = angular.module('links', [ ]);
+		app.controller('LinkController', function() {
+		// user actions
+		var that = this;
+		// attr
+		
+		this.showImport = false;
+		
+		this.linkAtual ={
+		title:"",
+		src:""
+		};
+		
+		this.chargeJson = '[{"title":"mantis","src":"http://www2.csi.com.br/mantis"},{"title":"Linx","src":"http://www.linxretail.com.br/area-do-cliente"},{"title":"office 365","src":"https://outlook.office.com/owa/?realm=linx.com.br&exsvurl=1&ll-cc=1046&modurl=0"},{"title":"tutorial java fx","src":"http://code.makery.ch/library/javafx-8-tutorial/pt/part1/"}]';
+		
+		if (localStorage.getItem('links')) {
+			that.links = JSON.parse(localStorage.links);
+				
+		} else {
+				that.links = [];
+		}
+		
+		
+		that.addItem = function() {
+
+				that.links.push(that.linkAtual);
+				that.storeLinks();
+				that.linkAtual = {};
+				
+
+		};
+		
+		that.removeItem = function(index) {
+
+			if (index > -1) {
+				that.links.splice(index, 1);
+			}
+			that.storeLinks();
+
+		};
+		
+		that.addCharge = function() {
+				try{
+				var charge = eval("("+that.chargeJson+")");
+				
+				for(var i=0;i<charge.length;i++){
+				console.log(charge[i].title);
+				that.links = charge;
+				
+				}
+				that.storeLinks();
+
+				}
+				catch(err) {
+					alert(err.message);
+				}	
+				
+				
+		};
+		
+		that.storeLinks = function(){
+		//localStorage.setItem('links', "");
+		localStorage.setItem('links', JSON.stringify(that.links));
+		};
+		
+		that.exportCharge = function() {
+		that.chargeJson = JSON.stringify(that.links);
+		};
+
+	});
+})();
+</script>
+</body>
+</html>
